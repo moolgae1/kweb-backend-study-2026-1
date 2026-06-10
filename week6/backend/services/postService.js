@@ -10,8 +10,20 @@ const postRepository = require('../repositories/postRepository');
  */
 async function getAllPosts() {
     // TODO: Implement
-    // postRepository.findAll() 호출
-    throw new Error('Not implemented');
+    return await postRepository.findAll();
+}
+
+async function findAll() {
+    const sql = `
+    SELECT
+    posts.id as id,
+    posts.title as title,
+    posts.content as content
+    posts.user_id as userId.
+    posts.username as username,
+    posts.created_at as createdAt,
+    count(replies)
+    `;
 }
 
 /**
@@ -32,7 +44,10 @@ async function createPost(title, content, userId) {
     // 1. 입력 유효성 검사
     // 2. postRepository.create() 호출
     // 3. 생성된 게시글 조회 및 반환
-    throw new Error('Not implemented');
+    if(title === "" || content === "") 
+        throw new Error("비면 안돼")
+    const newPost = await postRepository.create(title, content, userId)
+    return 
 }
 
 /**
@@ -45,7 +60,17 @@ async function updatePost(postId, title, content, userId) {
     // 3. 작성자 확인 (postRepository.isOwner)
     // 4. postRepository.update() 호출
     // 5. 수정된 게시글 조회 및 반환
-    throw new Error('Not implemented');
+    if (title === "" || content === "")
+        throw new Error("비면안됨.");
+    const post = await postRepository.findById(postId);
+    if(!post) throw new Error("존재 x");
+    const isOwner = postRepository.isOwner(postId, userId);
+    if(!post) throw new Error("권한 없음");
+
+    await postRepository.update(postId, title, content);
+
+    const post = await postRepository.findById(postId);
+    return post;
 }
 
 /**
@@ -56,7 +81,13 @@ async function deletePost(postId, userId) {
     // 1. 게시글 존재 확인
     // 2. 작성자 확인 (postRepository.isOwner)
     // 3. postRepository.deleteById() 호출
-    throw new Error('Not implemented');
+
+    const post = postRepository.findById(postId);
+    if(!post) throw new Error("존재안함!");
+    const isOwner = postRepository.isOwner(postId, userId);
+    if(!isOwner) throw new Error("권한없음!");
+
+    await postRepository.deleteById(postId);
 }
 
 module.exports = {
